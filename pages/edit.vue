@@ -1,5 +1,6 @@
 <template>
   <div>
+    <h1 class="text-center">Edit form</h1>
     <section class="header-section">
       <div>
         <button
@@ -19,6 +20,7 @@
         @update-default="changeDefaultHandler"
         @update-required="changeRequiredHandler"
         @delete-event="deleteEventHanlder"
+        @change-order="changeOrderHandler"
       />
     </section>
     <textarea class="w-96 h-40" readonly>
@@ -39,6 +41,7 @@ import {
   UpdateTypeEvent,
   UpdateRequiredEvent,
   FilledItemsObject,
+  movedObjectInterface,
 } from '~~/types/elements'
 
 let filledItems: FilledItemsObject = reactive({ items: [] })
@@ -62,7 +65,6 @@ function createMainElement(typeId: ELEMENT_NUMBER_TYPES): MainElement {
     typeId,
     id: uuidv4(),
     fieldId: `parameter_${order_number}`,
-    order: order_number,
     name: '',
     default: '',
     required: false,
@@ -114,6 +116,10 @@ function deleteEventHanlder(id: string) {
   filledItems.items = filledItems.items.filter((item) => {
     return item.id !== id
   })
+}
+
+function changeOrderHandler(event: movedObjectInterface) {
+  filledItems.items.splice(event.newIndex, 0, filledItems.items.splice(event.oldIndex, 1)[0]);
 }
 
 function copyToClipboard() {
