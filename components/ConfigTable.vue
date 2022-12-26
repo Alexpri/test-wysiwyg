@@ -51,8 +51,21 @@
         </div>
         <div class="w-36">
           <input
+            v-if="item.typeId == ELEMENT_NUMBER_TYPES.INPUT_NUMBER"
+            @input="eventDefaultHandler($event, item.id, item.typeId)"
+            type="number"
             class="w-full border border-slate-200 placeholder-slate-400"
-            :value="item.name"
+          />
+          <input
+            v-else-if="item.typeId == ELEMENT_NUMBER_TYPES.INPUT_CHECKBOX"
+            @input="eventDefaultHandler($event, item.id, item.typeId)"
+            type="checkbox"
+            class="w-full border border-slate-200 placeholder-slate-400"
+          />
+          <input
+            v-else
+            class="w-full border border-slate-200 placeholder-slate-400"
+            :value="item.default"
             @input="eventDefaultHandler($event, item.id, item.typeId)"
             type="text"
           />
@@ -121,11 +134,19 @@ function eventDefaultHandler(
   id: string,
   type: ELEMENT_NUMBER_TYPES
 ) {
-  emit('updateDefault', {
-    value: (event.target as HTMLSelectElement).value,
-    id,
-    type,
-  })
+  if (type === ELEMENT_NUMBER_TYPES.INPUT_CHECKBOX) {
+    emit('updateDefault', {
+      value: (event.target as HTMLInputElement).checked,
+      id,
+      type,
+    })
+  } else {
+    emit('updateDefault', {
+      value: (event.target as HTMLInputElement).value,
+      id,
+      type,
+    })
+  }
 }
 
 function eventTypeHandler(event: Event, id: string) {
@@ -142,7 +163,6 @@ function eventRequiredHandler(event: Event, id: string) {
 }
 
 function deleteHandler(id: string) {
-  console.log('---deleteHandler')
   emit('deleteEvent', id)
 }
 </script>

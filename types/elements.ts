@@ -23,7 +23,7 @@ export interface MainElement {
   id: string
   fieldId: string
   name: string
-  default: string
+  default: string | boolean
   required: boolean
 }
 

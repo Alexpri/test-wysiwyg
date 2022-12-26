@@ -1,5 +1,6 @@
 <template>
   <div>
+    <h1 class="text-center">Edit form</h1>
     <section class="header-section">
       <div>
         <button
