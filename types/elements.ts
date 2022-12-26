@@ -33,7 +33,6 @@ export interface UpdateIdEvent {
   type?: ELEMENT_TYPES
 }
 
-
 export interface UpdateTypeEvent {
   value: ELEMENT_NUMBER_TYPES
   id: string
@@ -48,4 +47,8 @@ export interface UpdateRequiredEvent {
 export interface UpdateInputEvent {
   value: string
   id: string
+}
+
+export interface FilledItemsObject {
+  items: Array<MainElement>
 }

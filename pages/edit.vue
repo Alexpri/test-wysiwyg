@@ -12,49 +12,51 @@
     </section>
     <section class="configuration-section">
       <ConfigTable
-        :filled-items="filledItems"
+        :filled-items="filledItems.items"
         @update-type="changeTypeHandler"
         @update-id="changeIdHandler"
         @update-name="changeNameHandler"
         @update-default="changeDefaultHandler"
         @update-required="changeRequiredHandler"
+        @delete-event="deleteEventHanlder"
       />
     </section>
+    <textarea class="w-96 h-40" readonly>
+      {{ encodedData }}
+    </textarea>
+    <button type="button" @click="copyToClipboard">Copy</button>
   </div>
 </template>
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import type { Ref } from 'vue'
 import {
   MainElement,
   UpdateIdEvent,
   ELEMENT_NUMBER_TYPES,
-  ELEMENT_TYPES,
   UpdateInputEvent,
   UpdateTypeEvent,
   UpdateRequiredEvent,
+  FilledItemsObject,
 } from '~~/types/elements'
 
-const selectedItemId: Ref<number | undefined> = ref(undefined)
-const filledItems: Array<MainElement> = reactive([])
+let filledItems: FilledItemsObject = reactive({ items: [] })
 const orderNumber: Ref<number> = ref(0)
 
+const encodedData = computed(() => {
+  return window.btoa(JSON.stringify(filledItems.items))
+})
+
 function addElementButtonHandler(): void {
-  filledItems.push(createInputText())
+  filledItems.items.push(createInputText())
 }
 
 function createInputText(): MainElement {
-  return createMainElement(
-    ELEMENT_TYPES.INPUT_TEXT,
-    ELEMENT_NUMBER_TYPES.INPUT_TEXT
-  )
+  return createMainElement(ELEMENT_NUMBER_TYPES.INPUT_TEXT)
 }
 
-function createMainElement(
-  type: ELEMENT_TYPES,
-  typeId: ELEMENT_NUMBER_TYPES
-): MainElement {
+function createMainElement(typeId: ELEMENT_NUMBER_TYPES): MainElement {
   const order_number = generateCurrentOrder()
   return {
     typeId,
@@ -66,7 +68,6 @@ function createMainElement(
     required: false,
   }
 }
-function deleteElement() {}
 
 function generateCurrentOrder(): number {
   const currentValue = orderNumber.value
@@ -75,37 +76,47 @@ function generateCurrentOrder(): number {
 }
 
 function changeTypeHandler(event: UpdateTypeEvent): void {
-  const foundElem = filledItems.find((item) => item.id === event.id)
+  const foundElem = filledItems.items.find((item) => item.id === event.id)
   if (foundElem) {
     foundElem.typeId = event.value
   }
 }
 
 function changeIdHandler(event: UpdateIdEvent): void {
-  const foundElem = filledItems.find((item) => item.id === event.id)
+  const foundElem = filledItems.items.find((item) => item.id === event.id)
   if (foundElem) {
     foundElem.fieldId = event.value
   }
 }
 
 function changeNameHandler(event: UpdateInputEvent): void {
-  const foundElem = filledItems.find((item) => item.id === event.id)
+  const foundElem = filledItems.items.find((item) => item.id === event.id)
   if (foundElem) {
     foundElem.name = event.value
   }
 }
 
 function changeDefaultHandler(event: UpdateInputEvent): void {
-  const foundElem = filledItems.find((item) => item.id === event.id)
+  const foundElem = filledItems.items.find((item) => item.id === event.id)
   if (foundElem) {
     foundElem.default = event.value
   }
 }
 
 function changeRequiredHandler(event: UpdateRequiredEvent): void {
-  const foundElem = filledItems.find((item) => item.id === event.id)
+  const foundElem = filledItems.items.find((item) => item.id === event.id)
   if (foundElem) {
     foundElem.required = event.value
   }
+}
+
+function deleteEventHanlder(id: string) {
+  filledItems.items = filledItems.items.filter((item) => {
+    return item.id !== id
+  })
+}
+
+function copyToClipboard() {
+  navigator.clipboard.writeText(encodedData.value)
 }
 </script>

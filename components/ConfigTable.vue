@@ -1,12 +1,13 @@
 <template>
-  <div class="flex flex-col">
+  <div class="flex flex-col w-full">
+    {{ filledItems }}
     <div class="flex flex-row">
       <div class="w-36">Type</div>
-      <div class="w-36">ID</div>
+      <div class="flex-grow">ID</div>
       <div class="w-48">Name</div>
       <div class="w-36">Default</div>
       <div class="w-36">Required</div>
-      <div>Action</div>
+      <div class="w-48">Action</div>
     </div>
 
     <div v-for="item in filledItems" :key="item.id" class="flex flex-row">
@@ -31,7 +32,7 @@
           type="text"
         />
       </div>
-      <div class="w-36">
+      <div class="flex-grow">
         <input
           class="w-full border border-slate-200 placeholder-slate-400"
           :value="item.fieldId"
@@ -39,32 +40,40 @@
           type="text"
         />
       </div>
+      <template v-if="item.typeId !== ELEMENT_NUMBER_TYPES.DIVIDER">
+        <div class="w-48">
+          <input
+            class="w-full border border-slate-200 placeholder-slate-400"
+            :value="item.name"
+            @input="eventNameHandler($event, item.id)"
+            type="text"
+          />
+        </div>
+        <div class="w-36">
+          <input
+            class="w-full border border-slate-200 placeholder-slate-400"
+            :value="item.name"
+            @input="eventDefaultHandler($event, item.id, item.typeId)"
+            type="text"
+          />
+        </div>
+        <div class="w-36">
+          <input
+            type="checkbox"
+            :value="item.name"
+            @input="eventRequiredHandler($event, item.id)"
+          />
+        </div>
+      </template>
+
       <div class="w-48">
-        <input
-          class="w-full border border-slate-200 placeholder-slate-400"
-          :value="item.name"
-          @input="eventNameHandler($event, item.id)"
-          type="text"
-        />
-      </div>
-      <div class="w-36">
-        <input
-          class="w-full border border-slate-200 placeholder-slate-400"
-          :value="item.name"
-          @input="eventDefaultHandler($event, item.id, item.typeId)"
-          type="text"
-        />
-      </div>
-      <div class="w-36">
-        <input
-          type="checkbox"
-          :value="item.name"
-          @input="eventRequiredHandler($event, item.id)"
-        />
-      </div>
-      <div>
         <button class="p-1 border border-gray-500 rounded-md mr-2">Drag</button>
-        <button class="p-1 border border-red-400 rounded-md">Delete</button>
+        <button
+          @click="deleteHandler(item.id)"
+          class="p-1 border border-red-400 rounded-md"
+        >
+          Delete
+        </button>
       </div>
     </div>
   </div>
@@ -87,6 +96,7 @@ const emit = defineEmits([
   'updateDefault',
   'updateType',
   'updateRequired',
+  'deleteEvent',
 ])
 
 const selectData: OptionData[] = [
@@ -119,12 +129,20 @@ function eventDefaultHandler(
 }
 
 function eventTypeHandler(event: Event, id: string) {
-  emit('updateType', { value: (event.target as HTMLSelectElement).value, id })
+  emit('updateType', {
+    value: Number((event.target as HTMLSelectElement).value),
+    id,
+  })
 }
 function eventRequiredHandler(event: Event, id: string) {
   emit('updateRequired', {
     value: (event.target as HTMLInputElement).checked,
     id,
   })
+}
+
+function deleteHandler(id: string) {
+  console.log('---deleteHandler')
+  emit('deleteEvent', id)
 }
 </script>
