@@ -2,129 +2,121 @@
   <div>
     <section class="header-section">
       <div>
-        <select
-          v-model="selectedItemId"
-          name="element select"
-          id="add-new-element-select"
+        <button
+          class="px-4 py-2 font-semibold text-sm bg-cyan-500 text-white rounded-full shadow-sm"
+          @click="addElementButtonHandler"
         >
-          <option
-            v-for="option of selectData"
-            :key="option.id"
-            :value="option.id"
-          >
-            {{ option.title }}
-          </option>
-        </select>
-        <button @click="addElementButtonHandler">Add element</button>
+          Add element
+        </button>
       </div>
     </section>
     <section class="configuration-section">
-      <ConfigTable :filled-items="filledItems" />
+      <ConfigTable
+        :filled-items="filledItems.items"
+        @update-type="changeTypeHandler"
+        @update-id="changeIdHandler"
+        @update-name="changeNameHandler"
+        @update-default="changeDefaultHandler"
+        @update-required="changeRequiredHandler"
+        @delete-event="deleteEventHanlder"
+      />
     </section>
+    <textarea class="w-96 h-40" readonly>
+      {{ encodedData }}
+    </textarea>
+    <button type="button" @click="copyToClipboard">Copy</button>
   </div>
 </template>
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import type { Ref } from 'vue'
+import {
+  MainElement,
+  UpdateIdEvent,
+  ELEMENT_NUMBER_TYPES,
+  UpdateInputEvent,
+  UpdateTypeEvent,
+  UpdateRequiredEvent,
+  FilledItemsObject,
+} from '~~/types/elements'
 
-enum ELEMENT_TYPES {
-  DIVIDER = 'Divider',
-  INPUT_NUMBER = 'Number',
-  INPUT_TEXT = 'Input',
-  INPUT_CHECKBOX = 'Checkbox',
-}
-
-enum ELEMENT_NUMBER_TYPES {
-  DIVIDER = 1,
-  INPUT_NUMBER = 2,
-  INPUT_TEXT = 3,
-  INPUT_CHECKBOX = 4,
-}
-
-const selectedItemId: Ref<number | undefined> = ref(undefined)
-const filledItems: Array<
-  DividerItem | InputNumberItem | InputTextItem | InputCheckboxItem
-> = reactive([])
+let filledItems: FilledItemsObject = reactive({ items: [] })
 const orderNumber: Ref<number> = ref(0)
 
-const selectData: OptionData[] = [
-  { title: '', id: undefined },
-  { title: 'Divider', id: 1 },
-  { title: 'Number', id: 2 },
-  { title: 'Input', id: 3 },
-  { title: 'Checkbox', id: 4 },
-]
-function addElementButtonHandler(): void {
-  let newElement:
-    | DividerItem
-    | InputNumberItem
-    | InputTextItem
-    | InputCheckboxItem
-    | null = null
-  console.log(selectedItemId)
-  if (selectedItemId.value) {
-    switch (selectedItemId.value) {
-      case ELEMENT_NUMBER_TYPES.DIVIDER:
-        newElement = createDivider()
-        break
-      case ELEMENT_NUMBER_TYPES.INPUT_NUMBER:
-        newElement = createInputNumber()
-        break
-      case ELEMENT_NUMBER_TYPES.INPUT_TEXT:
-        newElement = createInputText()
-        break
-      case ELEMENT_NUMBER_TYPES.INPUT_CHECKBOX:
-        newElement = createInputCheckbox()
-        break
-      default:
-        break
-    }
+const encodedData = computed(() => {
+  return window.btoa(JSON.stringify(filledItems.items))
+})
 
-    if (newElement) {
-      filledItems.push(newElement)
-      selectedItemId.value = undefined
-    }
-  }
+function addElementButtonHandler(): void {
+  filledItems.items.push(createInputText())
 }
-function createDivider(): DividerItem {
-  return {
-    type: ELEMENT_TYPES.DIVIDER,
-    ...createMainElement(),
-  }
+
+function createInputText(): MainElement {
+  return createMainElement(ELEMENT_NUMBER_TYPES.INPUT_TEXT)
 }
-function createInputNumber(): InputNumberItem {
+
+function createMainElement(typeId: ELEMENT_NUMBER_TYPES): MainElement {
+  const order_number = generateCurrentOrder()
   return {
-    type: ELEMENT_TYPES.INPUT_NUMBER,
-    ...createMainElement(),
-  }
-}
-function createInputText(): InputTextItem {
-  return {
-    type: ELEMENT_TYPES.INPUT_TEXT,
-    ...createMainElement(),
-  }
-}
-function createInputCheckbox(): InputCheckboxItem {
-  return {
-    type: ELEMENT_TYPES.INPUT_CHECKBOX,
-    ...createMainElement(),
-  }
-}
-function createMainElement(): MainElement {
-  return {
+    typeId,
     id: uuidv4(),
-    order: generateCurrentOrder(),
+    fieldId: `parameter_${order_number}`,
+    order: order_number,
     name: '',
     default: '',
     required: false,
   }
 }
-function deleteElement() {}
 
 function generateCurrentOrder(): number {
   const currentValue = orderNumber.value
   orderNumber.value += 1
   return currentValue
+}
+
+function changeTypeHandler(event: UpdateTypeEvent): void {
+  const foundElem = filledItems.items.find((item) => item.id === event.id)
+  if (foundElem) {
+    foundElem.typeId = event.value
+  }
+}
+
+function changeIdHandler(event: UpdateIdEvent): void {
+  const foundElem = filledItems.items.find((item) => item.id === event.id)
+  if (foundElem) {
+    foundElem.fieldId = event.value
+  }
+}
+
+function changeNameHandler(event: UpdateInputEvent): void {
+  const foundElem = filledItems.items.find((item) => item.id === event.id)
+  if (foundElem) {
+    foundElem.name = event.value
+  }
+}
+
+function changeDefaultHandler(event: UpdateInputEvent): void {
+  const foundElem = filledItems.items.find((item) => item.id === event.id)
+  if (foundElem) {
+    foundElem.default = event.value
+  }
+}
+
+function changeRequiredHandler(event: UpdateRequiredEvent): void {
+  const foundElem = filledItems.items.find((item) => item.id === event.id)
+  if (foundElem) {
+    foundElem.required = event.value
+  }
+}
+
+function deleteEventHanlder(id: string) {
+  filledItems.items = filledItems.items.filter((item) => {
+    return item.id !== id
+  })
+}
+
+function copyToClipboard() {
+  navigator.clipboard.writeText(encodedData.value)
 }
 </script>
