@@ -1,6 +1,5 @@
 <template>
   <div class="flex flex-col w-full">
-    {{ filledItems }}
     <div class="flex flex-row">
       <div class="w-36">Type</div>
       <div class="flex-grow">ID</div>
@@ -9,100 +8,115 @@
       <div class="w-36">Required</div>
       <div class="w-48">Action</div>
     </div>
+    <draggable
+      v-bind:model-value="filledItems"
+      @change="onMove"
+      item-key="id"
+      handle=".handle"
+    >
+      <template #item="{ element }">
+        <div class="flex flex-row">
+          <div class="w-36">
+            <select
+              :value="element.typeId"
+              @change="eventTypeHandler($event, element.id)"
+              name="element select"
+              id="add-new-element-select"
+              class="border rounded-sm border-gray-300 mr-2"
+            >
+              <option
+                v-for="option of selectData"
+                :key="option.id"
+                :value="option.id"
+              >
+                {{ option.title }}
+              </option>
+            </select>
+            <input
+              class="w-full border border-slate-200 placeholder-slate-400"
+              type="text"
+            />
+          </div>
+          <div class="flex-grow">
+            <input
+              class="w-full border border-slate-200 placeholder-slate-400"
+              :value="element.fieldId"
+              @input="eventIdHandler($event, element.id)"
+              type="text"
+            />
+          </div>
+          <template v-if="element.typeId !== ELEMENT_NUMBER_TYPES.DIVIDER">
+            <div class="w-48">
+              <input
+                class="w-full border border-slate-200 placeholder-slate-400"
+                :value="element.name"
+                @input="eventNameHandler($event, element.id)"
+                type="text"
+              />
+            </div>
+            <div class="w-36">
+              <input
+                v-if="element.typeId == ELEMENT_NUMBER_TYPES.INPUT_NUMBER"
+                @input="eventDefaultHandler($event, element.id, element.typeId)"
+                type="number"
+                class="w-full border border-slate-200 placeholder-slate-400"
+              />
+              <input
+                v-else-if="
+                  element.typeId == ELEMENT_NUMBER_TYPES.INPUT_CHECKBOX
+                "
+                @input="eventDefaultHandler($event, element.id, element.typeId)"
+                type="checkbox"
+                class="w-full border border-slate-200 placeholder-slate-400"
+              />
+              <input
+                v-else
+                class="w-full border border-slate-200 placeholder-slate-400"
+                :value="element.default"
+                @input="eventDefaultHandler($event, element.id, element.typeId)"
+                type="text"
+              />
+            </div>
+            <div class="w-36">
+              <input
+                type="checkbox"
+                :value="element.name"
+                @input="eventRequiredHandler($event, element.id)"
+              />
+            </div>
+          </template>
 
-    <div v-for="item in filledItems" :key="item.id" class="flex flex-row">
-      <div class="w-36">
-        <select
-          :value="item.typeId"
-          @change="eventTypeHandler($event, item.id)"
-          name="element select"
-          id="add-new-element-select"
-          class="border rounded-sm border-gray-300 mr-2"
-        >
-          <option
-            v-for="option of selectData"
-            :key="option.id"
-            :value="option.id"
-          >
-            {{ option.title }}
-          </option>
-        </select>
-        <input
-          class="w-full border border-slate-200 placeholder-slate-400"
-          type="text"
-        />
-      </div>
-      <div class="flex-grow">
-        <input
-          class="w-full border border-slate-200 placeholder-slate-400"
-          :value="item.fieldId"
-          @input="eventIdHandler($event, item.id)"
-          type="text"
-        />
-      </div>
-      <template v-if="item.typeId !== ELEMENT_NUMBER_TYPES.DIVIDER">
-        <div class="w-48">
-          <input
-            class="w-full border border-slate-200 placeholder-slate-400"
-            :value="item.name"
-            @input="eventNameHandler($event, item.id)"
-            type="text"
-          />
-        </div>
-        <div class="w-36">
-          <input
-            v-if="item.typeId == ELEMENT_NUMBER_TYPES.INPUT_NUMBER"
-            @input="eventDefaultHandler($event, item.id, item.typeId)"
-            type="number"
-            class="w-full border border-slate-200 placeholder-slate-400"
-          />
-          <input
-            v-else-if="item.typeId == ELEMENT_NUMBER_TYPES.INPUT_CHECKBOX"
-            @input="eventDefaultHandler($event, item.id, item.typeId)"
-            type="checkbox"
-            class="w-full border border-slate-200 placeholder-slate-400"
-          />
-          <input
-            v-else
-            class="w-full border border-slate-200 placeholder-slate-400"
-            :value="item.default"
-            @input="eventDefaultHandler($event, item.id, item.typeId)"
-            type="text"
-          />
-        </div>
-        <div class="w-36">
-          <input
-            type="checkbox"
-            :value="item.name"
-            @input="eventRequiredHandler($event, item.id)"
-          />
+          <div class="w-48">
+            <button class="p-1 border border-gray-500 rounded-md mr-2 handle">
+              Drag
+            </button>
+            <button
+              @click="deleteHandler(element.id)"
+              class="p-1 border border-red-400 rounded-md"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       </template>
-
-      <div class="w-48">
-        <button class="p-1 border border-gray-500 rounded-md mr-2">Drag</button>
-        <button
-          @click="deleteHandler(item.id)"
-          class="p-1 border border-red-400 rounded-md"
-        >
-          Delete
-        </button>
-      </div>
-    </div>
+    </draggable>
   </div>
 </template>
 
 <script setup lang="ts">
+import draggable from 'vuedraggable'
 import {
   OptionData,
   ELEMENT_TYPES,
   ELEMENT_NUMBER_TYPES,
   MainElement,
+  movedEvent
 } from '~~/types/elements'
 
 defineProps({
   filledItems: Array<MainElement>,
 })
+
 const emit = defineEmits([
   'updateId',
   'updateName',
@@ -110,6 +124,7 @@ const emit = defineEmits([
   'updateType',
   'updateRequired',
   'deleteEvent',
+  'changeOrder'
 ])
 
 const selectData: OptionData[] = [
@@ -164,5 +179,9 @@ function eventRequiredHandler(event: Event, id: string) {
 
 function deleteHandler(id: string) {
   emit('deleteEvent', id)
+}
+
+function onMove(e: movedEvent) {
+  emit('changeOrder', e.moved)
 }
 </script>

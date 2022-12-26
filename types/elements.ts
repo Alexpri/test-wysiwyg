@@ -19,7 +19,6 @@ export interface OptionData {
 
 export interface MainElement {
   typeId: ELEMENT_NUMBER_TYPES
-  order: number
   id: string
   fieldId: string
   name: string
@@ -31,6 +30,16 @@ export interface UpdateIdEvent {
   value: string
   id: string
   type?: ELEMENT_TYPES
+}
+
+export interface movedEvent {
+  moved: movedObjectInterface
+}
+
+export interface movedObjectInterface {
+  element: MainElement
+  newIndex: number
+  oldIndex: number
 }
 
 export interface UpdateTypeEvent {
