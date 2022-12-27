@@ -12,7 +12,6 @@
       </div>
     </section>
     <section class="configuration-section">
-      <!-- :filled-items="filledItems.items" -->
       <ConfigTable
         v-model="filledItems.items"
         @update-type="changeTypeHandler"
@@ -41,7 +40,6 @@ import {
   UpdateTypeEvent,
   UpdateRequiredEvent,
   FilledItemsObject,
-  movedObjectInterface,
 } from '~~/types/elements'
 
 let filledItems: FilledItemsObject = reactive({ items: [] })
@@ -81,6 +79,7 @@ function changeTypeHandler(event: UpdateTypeEvent): void {
   const foundElem = filledItems.items.find((item) => item.id === event.id)
   if (foundElem) {
     foundElem.typeId = event.value
+    foundElem.default = ''
   }
 }
 
