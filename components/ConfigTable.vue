@@ -9,8 +9,8 @@
       <div class="w-48">Action</div>
     </div>
     <draggable
-      v-bind:model-value="filledItems"
-      @change="onMove"
+      :modelValue="modelValue"
+      @update:modelValue="emit('update:modelValue', $event)"
       item-key="id"
       handle=".handle"
     >
@@ -110,11 +110,10 @@ import {
   ELEMENT_TYPES,
   ELEMENT_NUMBER_TYPES,
   MainElement,
-  movedEvent
 } from '~~/types/elements'
 
 defineProps({
-  filledItems: Array<MainElement>,
+  modelValue: Array<MainElement>,
 })
 
 const emit = defineEmits([
@@ -124,7 +123,7 @@ const emit = defineEmits([
   'updateType',
   'updateRequired',
   'deleteEvent',
-  'changeOrder'
+  'update:modelValue',
 ])
 
 const selectData: OptionData[] = [
@@ -179,9 +178,5 @@ function eventRequiredHandler(event: Event, id: string) {
 
 function deleteHandler(id: string) {
   emit('deleteEvent', id)
-}
-
-function onMove(e: movedEvent) {
-  emit('changeOrder', e.moved)
 }
 </script>

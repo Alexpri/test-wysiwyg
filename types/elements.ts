@@ -32,16 +32,6 @@ export interface UpdateIdEvent {
   type?: ELEMENT_TYPES
 }
 
-export interface movedEvent {
-  moved: movedObjectInterface
-}
-
-export interface movedObjectInterface {
-  element: MainElement
-  newIndex: number
-  oldIndex: number
-}
-
 export interface UpdateTypeEvent {
   value: ELEMENT_NUMBER_TYPES
   id: string

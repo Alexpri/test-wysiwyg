@@ -12,15 +12,15 @@
       </div>
     </section>
     <section class="configuration-section">
+      <!-- :filled-items="filledItems.items" -->
       <ConfigTable
-        :filled-items="filledItems.items"
+        v-model="filledItems.items"
         @update-type="changeTypeHandler"
         @update-id="changeIdHandler"
         @update-name="changeNameHandler"
         @update-default="changeDefaultHandler"
         @update-required="changeRequiredHandler"
         @delete-event="deleteEventHanlder"
-        @change-order="changeOrderHandler"
       />
     </section>
     <textarea class="w-96 h-40" readonly>
@@ -116,10 +116,6 @@ function deleteEventHanlder(id: string) {
   filledItems.items = filledItems.items.filter((item) => {
     return item.id !== id
   })
-}
-
-function changeOrderHandler(event: movedObjectInterface) {
-  filledItems.items.splice(event.newIndex, 0, filledItems.items.splice(event.oldIndex, 1)[0]);
 }
 
 function copyToClipboard() {
