@@ -22,10 +22,12 @@
         @delete-event="deleteEventHanlder"
       />
     </section>
-    <textarea class="w-96 h-40" readonly>
-      {{ encodedData }}
-    </textarea>
-    <button type="button" @click="copyToClipboard">Copy</button>
+    <ClientOnly>
+      <textarea class="w-96 h-40" readonly>
+        {{ encodedData }}
+      </textarea>
+      <button type="button" @click="copyToClipboard">Copy</button>
+    </ClientOnly>
   </div>
 </template>
 <script setup lang="ts">
@@ -46,7 +48,11 @@ let filledItems: FilledItemsObject = reactive({ items: [] })
 const orderNumber: Ref<number> = ref(0)
 
 const encodedData = computed(() => {
-  return window.btoa(JSON.stringify(filledItems.items))
+  let returnValue = ''
+  if (filledItems.items.length) {
+    returnValue = window.btoa(JSON.stringify(filledItems.items))
+  }
+  return returnValue
 })
 
 function addElementButtonHandler(): void {

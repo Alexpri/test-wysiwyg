@@ -7,9 +7,7 @@
       class="w-full border border-slate-200 placeholder-slate-400"
     />
     <div v-if="filledItems.length">
-      <template v-for="item in filledItems" :key="item.id">
-        <RenderElement :item="item" />
-      </template>
+      <RenderElement v-for="item in filledItems" :item="item" :key="item.id" />
     </div>
   </div>
 </template>
@@ -26,6 +24,7 @@ const filledItems = computed(() => {
       console.error(e)
     }
   }
+
   return returnValue
 })
 </script>
